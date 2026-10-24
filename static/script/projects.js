@@ -1,61 +1,49 @@
 (function(){
 	let list = [{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/teachai-agent-web',
+		'name':'AI 教师'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/image-to-character',
+		'name':'图片转字符'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/wxpay_monitor',
+		'name':'微信监控回调'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/rob-red-envelope',
+		'name':'抢红包'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/identify-front',
+		'name':'视觉识别'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/coursera-front',
+		'name':'知新堂'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/information-walls-front',
+		'name':'表白墙'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/coursera-bloc',
+		'name':'温故阁'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/comfortable-living-front',
+		'name':'安舒居'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/manpower-management-system',
+		'name':'人力管理'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/home',
+		'name':'个人主页'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/data-analysis-collection',
+		'name':'分析项目'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/crawlerCollection',
+		'name':'爬虫项目合集'
 	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/smart-health',
+		'name':'鸿蒙智能健康助手'
 	},{
-		'url':'xx',
-		'name':'xx'
-	},{
-		'url':'xx',
-		'name':'xx'
-	},{
-		'url':'xx',
-		'name':'xx'
-	},{
-		'url':'xx',
-		'name':'xx'
-	},{
-		'url':'xx',
-		'name':'xx'
+		'url':'https://github.com/JCXYOZH/book-information-management-system',
+		'name':'图书管理系统'
 	},{
 		'url':'https://github.com/JCXYOZH/dot-muncher',
 		'name':'吃豆游戏'
