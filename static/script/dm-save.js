@@ -1,5 +1,5 @@
 /*
- * dm-save.js —— 存档页逻辑：表单存档 / 覆盖 / 删除 / 导出 / 导入
+ * dm-save.js —— 存档页逻辑：表单存档 / 覆盖 / 删除 / 导出
  * 依赖：dm-core.js（DM.CORE / DM.UI）
  * 数据源：游戏页实时写入的检查点（localStorage dm.checkpoint）
  */
@@ -161,10 +161,7 @@
 			: '';
 		var actions = '<div class="dm-btn-row">';
 		if (!save._corrupt && !isAuto){
-			actions += '<button type="button" class="dm-btn dm-btn-small" data-act="load" data-id="' + esc(save.id) + '">读取并开始</button>';
-			actions += '<button type="button" class="dm-btn dm-btn-ghost dm-btn-small" data-act="overwrite" data-id="' + esc(save.id) + '">覆盖</button>';
-		}else if (!save._corrupt && isAuto){
-			actions += '<button type="button" class="dm-btn dm-btn-small" data-act="load" data-id="' + esc(save.id) + '">读取并开始</button>';
+			actions += '<button type="button" class="dm-btn dm-btn-small" data-act="overwrite" data-id="' + esc(save.id) + '">覆盖</button>';
 		}
 		actions += '<button type="button" class="dm-btn dm-btn-ghost dm-btn-small" data-act="export-one" data-id="' + esc(save.id) + '">导出</button>';
 		actions += '<button type="button" class="dm-btn dm-btn-danger dm-btn-small" data-act="remove" data-id="' + esc(save.id) + '">删除</button>';
@@ -302,10 +299,6 @@
 				saves: [save]
 			});
 			UI.toast('已导出「' + (save.name || '') + '」', 'success');
-		}else if (act === 'load'){
-			// 与读档页同款跳转逻辑：投放 pendingLoad 后进入游戏页恢复
-			CORE.setPending({ playerId: p.id, save: save });
-			window.location.href = './index.html';
 		}
 	});
 
@@ -314,34 +307,6 @@
 		if (!p){ return; }
 		download('dot-muncher_' + safeFilename(p.name) + '_存档.json', CORE.exportData(p.id));
 		UI.toast('已导出全部存档（' + p.name + '）', 'success');
-	});
-
-	document.getElementById('dm-import-btn').addEventListener('click', function(){
-		document.getElementById('dm-import-file').click();
-	});
-	document.getElementById('dm-import-file').addEventListener('change', function(){
-		var file = this.files && this.files[0];
-		this.value = '';
-		if (!file){ return; }
-		var p = CORE.active();
-		if (!p){ return; }
-		var reader = new FileReader();
-		reader.onload = function(){
-			var report = CORE.importData(reader.result, p.id);
-			if (report.error){
-				UI.toast(report.error, 'error');
-				return;
-			}
-			var msg = '成功导入 ' + report.imported + ' 份存档';
-			if (report.renamed){ msg += '，其中 ' + report.renamed + ' 份因重名已自动改名'; }
-			if (report.skipped){ msg += '，跳过 ' + report.skipped + ' 份（校验失败或超限）'; }
-			UI.toast(msg, report.imported ? 'success' : 'error');
-			render();
-		};
-		reader.onerror = function(){
-			UI.toast('文件读取失败', 'error');
-		};
-		reader.readAsText(file, 'utf-8');
 	});
 
 	/* ---------- 多标签页 / 本页变更同步 ---------- */

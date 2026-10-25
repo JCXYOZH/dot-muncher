@@ -31,106 +31,26 @@ img{
 .wrapper{
     position: relative;
     min-height: 100%;
+    /* 纵向 flex：内容不足一屏时把 footer 压到页面底部（ block 布局会令版权条上浮） */
+    display: flex;
+    flex-direction: column;
 }
 header{
     height: 64px;
     margin-bottom: 20px;
+    flex: 0 0 auto;
 }
 .container{
     padding-bottom: 84px;
+    flex: 1 1 auto;
+}
+footer{
+    flex: 0 0 auto;
 }
 .inner{
     max-width: 1000px;
     padding: 0 12px;
     margin: 0 auto;
-}
-
-.grid-6{
-    display: grid;
-    grid-template-columns: repeat(6,1fr);
-}
-.grid-5{
-    display: grid;
-    grid-template-columns: repeat(5,1fr);
-}
-.grid-4{
-    display: grid;
-    grid-template-columns: repeat(4,1fr);
-}
-.grid-3{
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-}
-.grid-2{
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-}
-.grid-1{
-    display: grid;
-    grid-template-columns: 1fr;
-}
-.gap-20{
-    gap: 20px;
-}
-.gap-19{
-    gap: 19px;
-}
-.gap-18{
-    gap: 18px;
-}
-.gap-6{
-    gap: 6px;
-}
-.gap-17{
-    gap: 17px;
-}
-.gap-16{
-    gap: 16px;
-}
-.gap-15{
-    gap: 15px;
-}
-.gap-14{
-    gap: 14px;
-}
-.gap-13{
-    gap: 13px;
-}
-.gap-12{
-    gap: 12px;
-}
-.gap-11{
-    gap: 11px;
-}
-.gap-10{
-    gap: 10px;
-}
-.gap-9{
-    gap: 9px;
-}
-.gap-8{
-    gap: 8px;
-}
-.gap-7{
-    gap: 7px;
-}
-.gap-6{
-    gap: 6px;
-}
-.gap-5{
-    gap: 5px;
-}
-.gap-4{
-    gap: 4px;
-}
-.gap-3{
-    gap: 3px;
-}
-.gap-2{
-    gap: 2px;
-}
-.gap-1{
-    gap: 1px;
 }
 
 .mod-head{
@@ -252,9 +172,6 @@ header{
     z-index: -1;
     background: url('../image/public/bg.svg') center top / cover repeat-x;
 }
-.mod-bg-world{
-    background: url(../image/public/word_map.png) center 40px no-repeat, url('../image/public/bg.svg') center top / cover repeat-x;
-}
 .mod-bg .waves,.waves{
     position: absolute;
     width: 100%;
@@ -373,94 +290,6 @@ header{
         padding: 0;
     }
 
-    .sm-grid-6{
-        display: grid;
-        grid-template-columns: repeat(6,1fr);
-    }
-    .sm-grid-5{
-        display: grid;
-        grid-template-columns: repeat(5,1fr);
-    }
-    .sm-grid-4{
-        display: grid;
-        grid-template-columns: repeat(4,1fr);
-    }
-    .sm-grid-3{
-        display: grid;
-        grid-template-columns: repeat(3,1fr);
-    }
-    .sm-grid-2{
-        display: grid;
-        grid-template-columns: repeat(2,1fr);
-    }
-    .sm-grid-1{
-        display: grid;
-        grid-template-columns: 1fr;
-    }
-    .sm-gap-20{
-        gap: 20px;
-    }
-    .sm-gap-19{
-        gap: 19px;
-    }
-    .sm-gap-18{
-        gap: 18px;
-    }
-    .sm-gap-6{
-        gap: 6px;
-    }
-    .sm-gap-17{
-        gap: 17px;
-    }
-    .sm-gap-16{
-        gap: 16px;
-    }
-    .sm-gap-15{
-        gap: 15px;
-    }
-    .sm-gap-14{
-        gap: 14px;
-    }
-    .sm-gap-13{
-        gap: 13px;
-    }
-    .sm-gap-12{
-        gap: 12px;
-    }
-    .sm-gap-11{
-        gap: 11px;
-    }
-    .sm-gap-10{
-        gap: 10px;
-    }
-    .sm-gap-9{
-        gap: 9px;
-    }
-    .sm-gap-8{
-        gap: 8px;
-    }
-    .sm-gap-7{
-        gap: 7px;
-    }
-    .sm-gap-6{
-        gap: 6px;
-    }
-    .sm-gap-5{
-        gap: 5px;
-    }
-    .sm-gap-4{
-        gap: 4px;
-    }
-    .sm-gap-3{
-        gap: 3px;
-    }
-    .sm-gap-2{
-        gap: 2px;
-    }
-    .sm-gap-1{
-        gap: 1px;
-    }
-
     .mod-head .bd{
         flex-direction: column;
         gap:0;
@@ -512,9 +341,6 @@ header{
 
     .mod-bg{
         height: 550px;
-    }
-    .mod-bg-world{
-        background: url(../image/public/word_map.png) center center / contain no-repeat, url('../image/public/bg.svg') center top / cover repeat-x;
     }
     .mod-foot .bd{
         line-height: 20px;

@@ -1,5 +1,5 @@
 /*
- * dm-load.js —— 读档页逻辑：继续当前进度 / 选择存档恢复进游戏
+ * dm-load.js —— 读档页逻辑：继续当前进度 / 选择存档恢复进游戏 / 转存存档 / 导入存档
  * 依赖：dm-core.js（DM.CORE / DM.UI）
  * 恢复机制：sessionStorage 投放 pendingLoad（自包含负载）→ 跳转游戏页
  */
@@ -14,6 +14,7 @@
 	var $session = document.getElementById('dm-session');
 	var $list = document.getElementById('dm-list');
 	var $playerTag = document.getElementById('dm-player-tag');
+	var $toolbar = document.getElementById('dm-toolbar');
 
 	function esc(text){
 		return String(text == null ? '' : text).replace(/[&<>"']/g, function(c){
@@ -83,8 +84,8 @@
 		var actions = '<div class="dm-btn-row">';
 		if (!save._corrupt){
 			actions += '<button type="button" class="dm-btn dm-btn-small" data-act="load" data-id="' + esc(save.id) + '">读取并开始</button>';
+			actions += '<button type="button" class="dm-btn dm-btn-ghost dm-btn-small" data-act="copy" data-id="' + esc(save.id) + '">转存</button>';
 		}
-		actions += '<button type="button" class="dm-btn dm-btn-ghost dm-btn-small" data-act="export-one" data-id="' + esc(save.id) + '">导出</button>';
 		actions += '<button type="button" class="dm-btn dm-btn-danger dm-btn-small" data-act="remove" data-id="' + esc(save.id) + '">删除</button>';
 		actions += '</div>';
 		return (
@@ -106,8 +107,10 @@
 		if (!p){
 			$playerTag.textContent = '';
 			$list.innerHTML = '<div class="dm-empty">-</div>';
+			$toolbar.style.display = 'none';
 			return;
 		}
+		$toolbar.style.display = '';
 		var st = p.stats || {};
 		$playerTag.innerHTML = esc(p.name) + (st.cleared ? ' <span class="dm-badge dm-badge-clear">已通关</span>' : '');
 		var saves = CORE.saves(p.id);
@@ -116,7 +119,7 @@
 		var autoSaves = saves.filter(function(s){ return s.slotType === 'auto'; })
 			.sort(function(a, b){ return (b.updatedAt || 0) - (a.updatedAt || 0); });
 		if (!manualSaves.length && !autoSaves.length){
-			$list.innerHTML = '<div class="dm-empty">还没有任何存档。<a href="./index.html">去玩一局</a>，通关或离页时会自动存档。</div>';
+			$list.innerHTML = '<div class="dm-empty">还没有任何存档。<a href="./index.html">去玩一局</a>，通关或离页时会自动存档，或者导入已有存档。</div>';
 			return;
 		}
 		$list.innerHTML = manualSaves.concat(autoSaves).map(function(s){
@@ -130,28 +133,70 @@
 		renderList();
 	}
 
-	/* ---------- 导出单份 ---------- */
+	/* ---------- 导入存档（单份 / 多份，来自存档页导出的 .json） ---------- */
 
-	function download(filename, data){
-		try{
-			var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-			var url = URL.createObjectURL(blob);
-			var a = document.createElement('a');
-			a.href = url;
-			a.download = filename;
-			document.body.appendChild(a);
-			a.click();
-			setTimeout(function(){
-				document.body.removeChild(a);
-				URL.revokeObjectURL(url);
-			}, 100);
-		}catch(e){
-			UI.toast('导出失败：浏览器不支持文件下载', 'error');
+	function importFiles(files){
+		var p = CORE.active();
+		if (!p){
+			UI.toast('尚未选择玩家，无法导入', 'error');
+			return;
 		}
+		var agg = { imported: 0, skipped: 0, renamed: 0, bad: 0 };
+		var pending = files.length;
+		files.forEach(function(file){
+			var reader = new FileReader();
+			var settled = false;
+			function finish(){
+				if (settled){ return; }
+				settled = true;
+				pending -= 1;
+				if (pending === 0){
+					var msg = '成功导入 ' + agg.imported + ' 份存档';
+					if (agg.renamed){ msg += '，' + agg.renamed + ' 份重名已自动改名'; }
+					if (agg.skipped){ msg += '，跳过 ' + agg.skipped + ' 份（自动档/校验失败/超限）'; }
+					if (agg.bad){ msg += '，' + agg.bad + ' 个文件无效'; }
+					UI.toast(msg, agg.imported ? 'success' : 'error');
+					render();
+				}
+			}
+			reader.onload = function(){
+				var report = CORE.importData(reader.result, p.id);
+				if (report.error){
+					agg.bad += 1;
+				}else{
+					agg.imported += report.imported;
+					agg.skipped += report.skipped;
+					agg.renamed += report.renamed;
+				}
+				finish();
+			};
+			reader.onerror = function(){
+				agg.bad += 1;
+				finish();
+			};
+			reader.readAsText(file, 'utf-8');
+		});
 	}
-	function safeFilename(name){
-		return String(name || '玩家').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 30);
-	}
+
+	document.getElementById('dm-import-btn').addEventListener('click', function(){
+		document.getElementById('dm-import-file').click();
+	});
+	document.getElementById('dm-import-file').addEventListener('change', function(){
+		var file = this.files && this.files[0];
+		this.value = '';
+		if (!file){ return; }
+		importFiles([file]);
+	});
+
+	document.getElementById('dm-import-multi-btn').addEventListener('click', function(){
+		document.getElementById('dm-import-multi-file').click();
+	});
+	document.getElementById('dm-import-multi-file').addEventListener('change', function(){
+		var files = Array.prototype.slice.call(this.files || []);
+		this.value = '';
+		if (!files.length){ return; }
+		importFiles(files);
+	});
 
 	/* ---------- 事件 ---------- */
 
@@ -196,6 +241,14 @@
 			}
 			CORE.setPending({ playerId: p.id, save: save });
 			window.location.href = './index.html';
+		}else if (act === 'copy'){
+			var dup = CORE.duplicateSave(p.id, id);
+			if (dup.error){
+				UI.toast(dup.error, 'error');
+			}else{
+				UI.toast('已转存为「' + dup.save.name + '」', 'success');
+			}
+			render();
 		}else if (act === 'remove'){
 			UI.confirm({
 				title: '删除存档「' + (save.name || '') + '」？',
@@ -212,15 +265,6 @@
 				}
 				render();
 			});
-		}else if (act === 'export-one'){
-			download('dot-muncher_' + safeFilename(save.name) + '.json', {
-				magic: 'DOT-MUNCHER-SAVE',
-				version: CORE.SCHEMA_VERSION,
-				exportedAt: Date.now(),
-				player: { id: p.id, name: p.name },
-				saves: [save]
-			});
-			UI.toast('已导出「' + (save.name || '') + '」', 'success');
 		}
 	});
 
