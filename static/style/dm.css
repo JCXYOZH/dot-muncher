@@ -1,0 +1,604 @@
+@charset "UTF-8";
+/*
+ * dm.css —— 存档系统页面共用样式（玩家/存档/读档 + 游戏页 HUD/Toast/确认弹层）
+ * 设计语言保持站点一致：复用 common.css 的 CSS 变量与卡片/按钮形态
+ */
+
+/* ============================ 页面骨架 ============================ */
+
+.mod-dm .hd{
+    padding-top: 30px;
+    margin-bottom: 35px;
+    text-align: center;
+}
+.mod-dm .hd .title{
+    line-height: 40px;
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+.mod-dm .hd .subtitle{
+    position: relative;
+    line-height: 26px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #e8e8e8;
+}
+.mod-dm .bd{
+    padding-bottom: 30px;
+}
+
+/* ============================ 通用卡片 ============================ */
+
+.dm-card{
+    position: relative;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f9fbfd;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    transition: all 0.12s ease-in;
+}
+.dm-card.highlight{
+    background: linear-gradient(0deg, #ecf5fa 0%, #f3f9ff 38.1%, #f9fbfd 100%);
+    border-color: #d8e8f2;
+}
+.dm-card.dm-corrupt{
+    background: #faf6f6;
+    border-color: #ecd8d8;
+}
+.dm-card:hover{
+    box-shadow: 1px 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+.dm-section-title{
+    position: relative;
+    margin: 25px 0 12px;
+    padding-left: 16px;
+    line-height: 24px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--title-color);
+}
+.dm-section-title::before{
+    position: absolute;
+    left: 1px;
+    top: 3px;
+    content: '';
+    width: 5px;
+    height: 18px;
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+.dm-section-title .sub{
+    margin-left: 10px;
+    font-size: 14px;
+    font-weight: normal;
+    color: var(--text-color);
+}
+
+/* ============================ 按钮 ============================ */
+
+.dm-btn{
+    display: inline-block;
+    min-width: 72px;
+    height: 36px;
+    padding: 0 18px;
+    background: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 18px;
+    line-height: 34px;
+    vertical-align: middle;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    transition: background .15s, opacity .15s, box-shadow .15s;
+    box-sizing: border-box;
+}
+.dm-btn:hover{
+    background: var(--primary-hover-color);
+    border-color: var(--primary-hover-color);
+}
+.dm-btn:active{
+    opacity: .85;
+}
+.dm-btn[disabled],
+.dm-btn.dm-disabled{
+    background: #c9d3da;
+    border-color: #c9d3da;
+    color: #f4f7f9;
+    cursor: not-allowed;
+}
+.dm-btn.dm-btn-ghost{
+    background: transparent;
+    border: 1px solid #c4d2dc;
+    color: var(--text-dark-color);
+}
+.dm-btn.dm-btn-ghost:hover{
+    background: #eef5fa;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.dm-btn.dm-btn-danger{
+    background: transparent;
+    border: 1px solid #e3b8b8;
+    color: #c05050;
+}
+.dm-btn.dm-btn-danger:hover{
+    background: #fdf2f2;
+    border-color: #c05050;
+    color: #a53d3d;
+}
+.dm-btn.dm-btn-small{
+    min-width: 56px;
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 15px;
+    line-height: 28px;
+    font-size: 14px;
+}
+.dm-btn-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ============================ 表单 ============================ */
+
+.dm-input{
+    height: 38px;
+    padding: 0 14px;
+    background: #fff;
+    border: 1px solid #d1d9e0;
+    border-radius: 8px;
+    line-height: 38px;
+    font-size: 15px;
+    color: var(--text-dark-color);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s, box-shadow .15s;
+}
+.dm-input:focus{
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(32, 149, 242, 0.12);
+}
+.dm-input::placeholder{
+    color: #a8b0b8;
+}
+.dm-form-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.dm-form-error{
+    min-height: 20px;
+    margin-top: 8px;
+    line-height: 20px;
+    font-size: 13px;
+    color: #c05050;
+}
+.dm-form-hint{
+    margin-top: 8px;
+    line-height: 20px;
+    font-size: 13px;
+    color: var(--text-color);
+}
+
+/* ============================ 玩家条目 ============================ */
+
+.dm-player-row{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.dm-avatar{
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    line-height: 52px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
+    overflow: hidden;
+}
+.dm-avatar.guest{
+    background: #7a8ba0;
+}
+.dm-player-info{
+    flex: 1;
+    min-width: 0;
+}
+.dm-player-name{
+    line-height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dm-player-meta{
+    line-height: 22px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+.dm-player-stats{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 8px;
+}
+.dm-stat{
+    line-height: 24px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+.dm-stat b{
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--title-color);
+    margin-left: 6px;
+}
+
+/* 徽章 */
+.dm-badge{
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 10px;
+    background: #eef2f6;
+    border-radius: 10px;
+    line-height: 20px;
+    font-size: 12px;
+    color: var(--text-dark-color);
+    vertical-align: 2px;
+}
+.dm-badge.dm-badge-manual{
+    background: #e3f0fb;
+    color: #1565a0;
+}
+.dm-badge.dm-badge-auto{
+    background: #eef2f6;
+    color: #61707d;
+}
+.dm-badge.dm-badge-clear{
+    background: #fdf3d7;
+    color: #9c7a12;
+}
+.dm-badge.dm-badge-corrupt{
+    background: #fbe9e9;
+    color: #b04a4a;
+}
+.dm-badge.dm-badge-active{
+    background: #e3f7e8;
+    color: #237a3a;
+}
+
+/* ============================ 存档条目 ============================ */
+
+.dm-save-row{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.dm-save-info{
+    flex: 1;
+    min-width: 0;
+}
+.dm-save-name{
+    line-height: 26px;
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dm-save-meta{
+    line-height: 22px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+.dm-save-meta .sep{
+    margin: 0 8px;
+    color: #d5dce2;
+}
+.dm-save-remark{
+    margin-top: 2px;
+    line-height: 20px;
+    font-size: 13px;
+    color: #8a97a3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 进度卡片（当前对局） */
+.dm-progress{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+.dm-progress .dm-progress-info{
+    flex: 1;
+    min-width: 240px;
+}
+.dm-progress .dm-progress-form{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.dm-progress .dm-progress-form .dm-input{
+    width: 200px;
+}
+.dm-progress .dm-progress-form .dm-input.dm-input-remark{
+    flex: 1;
+    min-width: 160px;
+    width: auto;
+}
+
+/* 空状态 / 提示条 */
+.dm-empty{
+    padding: 34px 20px;
+    line-height: 26px;
+    text-align: center;
+    font-size: 15px;
+    color: #9aa3ac;
+}
+.dm-empty a{
+    color: var(--primary-color);
+}
+.dm-notice{
+    margin-bottom: 18px;
+    padding: 12px 18px;
+    background: #fdf6e6;
+    border: 1px solid #efe3c2;
+    border-radius: 8px;
+    line-height: 24px;
+    font-size: 14px;
+    color: #8a6d1a;
+}
+.dm-notice.dm-notice-error{
+    background: #fbecec;
+    border-color: #ecd4d4;
+    color: #a53d3d;
+}
+.dm-notice a{
+    color: var(--primary-color);
+}
+
+/* 工具栏 */
+.dm-toolbar{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px dashed #e3e9ee;
+    align-items: center;
+}
+.dm-toolbar .tip{
+    flex: 1;
+    min-width: 200px;
+    line-height: 22px;
+    font-size: 13px;
+    color: #9aa3ac;
+    text-align: right;
+}
+
+/* ============================ Toast ============================ */
+
+#dm-toast-box{
+    position: fixed;
+    left: 50%;
+    top: 18px;
+    z-index: 9999;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+}
+.dm-toast{
+    max-width: 86vw;
+    padding: 9px 22px;
+    background: rgba(63, 67, 73, 0.92);
+    border-radius: 20px;
+    line-height: 22px;
+    font-size: 14px;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+    animation: dm-toast-in .25s ease-out;
+    transition: opacity .3s, transform .3s;
+}
+.dm-toast.dm-toast-success{
+    background: rgba(35, 122, 58, 0.94);
+}
+.dm-toast.dm-toast-error{
+    background: rgba(176, 74, 74, 0.94);
+}
+.dm-toast.dm-toast-out{
+    opacity: 0;
+    transform: translateY(-8px);
+}
+@keyframes dm-toast-in{
+    from{
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================ 确认弹层 ============================ */
+
+.dm-modal-overlay{
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 9998;
+    width: 100%;
+    height: 100%;
+    background: rgba(30, 36, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: dm-fade-in .18s ease-out;
+}
+.dm-modal{
+    width: 400px;
+    max-width: calc(100vw - 40px);
+    padding: 22px 24px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+.dm-modal .dm-modal-title{
+    margin-bottom: 10px;
+    line-height: 26px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--title-color);
+}
+.dm-modal.dm-modal-danger .dm-modal-title{
+    color: #a53d3d;
+}
+.dm-modal .dm-modal-text{
+    line-height: 24px;
+    font-size: 14px;
+    color: var(--text-dark-color);
+}
+.dm-modal .dm-modal-btns{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+@keyframes dm-fade-in{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
+}
+
+/* ============================ 游戏页 HUD ============================ */
+
+.mod-panel .bd{
+    position: relative;
+}
+.dm-hud{
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    z-index: 9;
+    padding: 6px 14px;
+    background: rgba(0, 100, 148, 0.85);
+    border-radius: 16px;
+    line-height: 20px;
+    font-size: 13px;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+}
+.dm-hud.show{
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 游戏页快捷链接 */
+.mod-panel .info .links{
+    margin-top: 4px;
+    font-size: 14px;
+}
+.mod-panel .info .links a{
+    color: var(--primary-color);
+}
+.mod-panel .info .links a:hover{
+    color: var(--primary-hover-color);
+    text-decoration: underline;
+}
+.mod-panel .info .links .sep{
+    margin: 0 8px;
+    color: #c9d3da;
+}
+
+/* ============================ 响应式 ============================ */
+
+@media screen and (max-width: 800px){
+    .mod-dm .hd{
+        padding-top: 15px;
+        margin-bottom: 22px;
+    }
+    .mod-dm .hd .title{
+        line-height: 32px;
+        font-size: 26px;
+    }
+    .mod-dm .hd .subtitle{
+        line-height: 22px;
+        font-size: 17px;
+    }
+
+    .dm-card{
+        padding: 14px;
+        border-radius: 10px;
+    }
+    .dm-save-row,
+    .dm-player-row{
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .dm-save-info,
+    .dm-player-info{
+        flex: 1 0 100%;
+    }
+    .dm-avatar{
+        width: 44px;
+        height: 44px;
+        line-height: 44px;
+        font-size: 19px;
+    }
+    .dm-btn-row{
+        width: 100%;
+    }
+    .dm-btn-row .dm-btn{
+        flex: 1;
+    }
+    .dm-progress .dm-progress-info{
+        flex: 1 0 100%;
+    }
+    .dm-progress .dm-progress-form{
+        width: 100%;
+    }
+    .dm-progress .dm-progress-form .dm-input{
+        flex: 1;
+        width: auto;
+        min-width: 0;
+    }
+    .dm-progress .dm-progress-form .dm-input.dm-input-remark{
+        min-width: 0;
+    }
+    .dm-player-stats{
+        gap: 12px;
+    }
+    .dm-toolbar .tip{
+        flex: 1 0 100%;
+        text-align: left;
+    }
+}

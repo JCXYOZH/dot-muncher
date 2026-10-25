@@ -3,14 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <meta name="description" content="web开发组件化">
-        <meta name="keywords" content="web前端开发,前端组件,组件库,jQuery插件">
+        <meta name="description" content="吃豆游戏读档：继续当前进度或选择历史存档恢复游戏">
+        <meta name="keywords" content="吃豆游戏,读档,继续游戏">
         <meta name="author" content="旧城新月, JCXYOZH" />
-        <title>文字 - JCXYOZH</title>
+        <title>读档 - JCXYOZH</title>
         <link rel="shortcut icon" href="favicon.ico"/>
-        <link rel="canonical" href="./writing.html">
+        <link rel="canonical" href="./load.html">
         <link rel="stylesheet" href="./static/style/common.css">
-        <link rel="stylesheet" href="./static/style/project.css">
+        <link rel="stylesheet" href="./static/style/dm.css">
     </head>
     <body>
         <div class="wrapper">
@@ -23,9 +23,9 @@
                             </div>
                             <nav>
                                 <li><a href="./project.html">项目</a></li>
-                                <li class="active"><a href="./writing.html">文字</a></li>
-                                <li><a href="./photograph.html">摄影</a></li>
-                                <li><a href="./comment.html">留言</a></li>
+                                <li><a href="./player.html">玩家</a></li>
+                                <li><a href="./save.html">存档</a></li>
+                                <li class="active"><a href="./load.html">读档</a></li>
                                 <li><a href="./about.html">关于</a></li>
                             </nav>
                             <div class="operation">
@@ -53,34 +53,16 @@
             </header>
             <div class="container">
                 <div class="inner">
-                    <section class="mod-project">
+                    <section class="mod-dm mod-dm-load">
                         <div class="hd">
-                            <h3 class="title">我的XX</h3>
-                            <p class="subtitle">My XXXX</p>
+                            <h3 class="title">读档</h3>
+                            <p class="subtitle">Load Game</p>
                         </div>
                         <div class="bd">
-                            <div class="group">
-                                <h3>笔记</h3>
-                                <ul>
-                                    <li>
-                                        <div class="J_link project">
-                                            <p class="title"><a href="xx" target="_blank">xx</a></p>
-                                            <p class="subtitle">xxxx</p>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="group">
-                                <h3>查询文档</h3>
-                                <ul>
-                                    <li>
-                                        <div class="J_link project">
-                                            <p class="title"><a href="xx" target="_blank">xx</a></p>
-                                            <p class="subtitle">xxxx</p>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
+                            <div id="dm-notice"></div>
+                            <div id="dm-session"></div>
+                            <div class="dm-section-title">选择存档 <span class="sub" id="dm-player-tag"></span></div>
+                            <div id="dm-list"></div>
                         </div>
                     </section>
                 </div>
@@ -90,7 +72,7 @@
                     <div class="bd">
                         <ul>
                             <li>
-                                <a class="qrcode" href="javascript:;" href="javascript:;">
+                                <a class="qrcode" href="javascript:;">
                                     <img src="./static/image/public/icon-scan.png" width="24" height="24"/>
                                     <span class="popup">
                                         <img src="./static/image/public/qrcode.bmp" width="150" alt="支付宝打赏"/>
@@ -116,6 +98,8 @@
                 </div>
             </footer>
         </div>
+        <script type="text/javascript" src="./static/script/dm-core.js"></script>
+        <script type="text/javascript" src="./static/script/dm-load.js"></script>
         <script type="text/javascript" src="./static/script/common.js"></script>
     </body>
 </html>

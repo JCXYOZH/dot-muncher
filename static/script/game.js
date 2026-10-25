@@ -409,6 +409,10 @@ function Game(id,params){
     this.getStages = function(){
         return _stages;
     };
+    //获取当前布景索引（存档系统集成所需，只读访问器）
+    this.getIndex = function(){
+        return _index;
+    };
     //初始化游戏引擎
     this.init = function(){
         _index = 0;

@@ -23,14 +23,14 @@ const $scrollContainer = document.documentElement;
     });
 })();
 
-// 块链接
+// 块链接（注：向上遍历需判空——点击目标处于刚被移除的弹层等游离节点时，parentNode 链会取到 null）
 (function(){
     document.addEventListener('click',function(e) {
         let $tag = e.target;
-        while ($tag.tagName!='A'&&$tag.tagName!='BODY'&&!$tag.classList.contains('J_link')) {
+        while ($tag && $tag.tagName!='A' && $tag.tagName!='BODY' && !($tag.classList && $tag.classList.contains('J_link'))) {
             $tag = $tag.parentNode;
         }
-        if($tag.tagName!='A'&&$tag.classList.contains('J_link')){
+        if($tag && $tag.tagName!='A' && $tag.classList && $tag.classList.contains('J_link')){
             let url = $tag.getAttribute('data-url');
             let target = $tag.getAttribute('data-target');
             if(url){
@@ -41,12 +41,14 @@ const $scrollContainer = document.documentElement;
                 }
             }else{
                 let $link = $tag.querySelector('a');
-                target = $link.getAttribute('target');
-                url = $link.getAttribute('href')||'/';
-                if (target == '_blank') {
-                    window.open(url);
-                } else {
-                    location.href = url;
+                if ($link){
+                    target = $link.getAttribute('target');
+                    url = $link.getAttribute('href')||'/';
+                    if (target == '_blank') {
+                        window.open(url);
+                    } else {
+                        location.href = url;
+                    }
                 }
             }
         }

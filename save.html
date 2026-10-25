@@ -3,14 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <meta name="description" content="网站留言">
-        <meta name="keywords" content="留言">
-        <meta name="author" content="旧城新月, JCXYOZH"/>
-        <title>留言 - JCXYOZH</title>
+        <meta name="description" content="吃豆游戏存档管理：保存当前进度、覆盖、删除、导出与导入存档">
+        <meta name="keywords" content="吃豆游戏,存档,读档,游戏存档">
+        <meta name="author" content="旧城新月, JCXYOZH" />
+        <title>存档 - JCXYOZH</title>
         <link rel="shortcut icon" href="favicon.ico"/>
-        <link rel="canonical" href="./comment.html">
+        <link rel="canonical" href="./save.html">
         <link rel="stylesheet" href="./static/style/common.css">
-        <link rel="stylesheet" href="./static/style/comment.css">
+        <link rel="stylesheet" href="./static/style/dm.css">
     </head>
     <body>
         <div class="wrapper">
@@ -23,9 +23,9 @@
                             </div>
                             <nav>
                                 <li><a href="./project.html">项目</a></li>
-                                <li><a href="./writing.html">文字</a></li>
-                                <li><a href="./photograph.html">摄影</a></li>
-                                <li class="active"><a href="./comment.html">留言</a></li>
+                                <li><a href="./player.html">玩家</a></li>
+                                <li class="active"><a href="./save.html">存档</a></li>
+                                <li><a href="./load.html">读档</a></li>
                                 <li><a href="./about.html">关于</a></li>
                             </nav>
                             <div class="operation">
@@ -53,15 +53,24 @@
             </header>
             <div class="container">
                 <div class="inner">
-                    <section class="mod-comment">
+                    <section class="mod-dm mod-dm-save">
                         <div class="hd">
-                            <span class="title">在<strong>Github</strong>上与我留言：</span>
-                            <a class="btn" href="https://github.com/JCXYOZH/JCXYOZH.github.io/issues/new" target="_blank">发起留言</a>
+                            <h3 class="title">存档</h3>
+                            <p class="subtitle">Saves</p>
                         </div>
                         <div class="bd">
-                            <ul id="comment">
-                                <li><div class="c-bd"><img src="./static/image/public/loading.gif" width="32" height="32"/></div></li>
-                            </ul>
+                            <div id="dm-notice"></div>
+                            <div id="dm-progress"></div>
+                            <div class="dm-section-title">手动存档 <span class="sub" id="dm-manual-count"></span></div>
+                            <div id="dm-manual"></div>
+                            <div class="dm-section-title">自动存档 <span class="sub">通关或离开页面时自动保留最近 3 份</span></div>
+                            <div id="dm-auto"></div>
+                            <div class="dm-toolbar" id="dm-toolbar">
+                                <button type="button" class="dm-btn dm-btn-ghost" id="dm-export">导出全部存档</button>
+                                <button type="button" class="dm-btn dm-btn-ghost" id="dm-import-btn">导入存档</button>
+                                <input type="file" id="dm-import-file" accept=".json,application/json" style="display:none;"/>
+                                <div class="tip">导出的 .json 文件可在其他浏览器/设备导入，实现存档迁移备份。</div>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -71,7 +80,7 @@
                     <div class="bd">
                         <ul>
                             <li>
-                                <a class="qrcode" href="javascript:;" href="javascript:;">
+                                <a class="qrcode" href="javascript:;">
                                     <img src="./static/image/public/icon-scan.png" width="24" height="24"/>
                                     <span class="popup">
                                         <img src="./static/image/public/qrcode.bmp" width="150" alt="支付宝打赏"/>
@@ -97,31 +106,8 @@
                 </div>
             </footer>
         </div>
-        <script type="text/javascript">
-            fetch('https://api.github.com/repos/JCXYOZH/JCXYOZH.github.io/issues').then((response) => response.json()).then(data => {
-                if(data.length){
-                    var comments = [];
-                    for(var i=0;i<data.length;i++){
-                        var item = data[i];
-                        comments.push(`<li>
-                            <div class="avatar">
-                                <a href="${item.user.html_url}" target="_blank">
-                                    <img src="${item.user.avatar_url}" width="72" height="72"/>
-                                </a>
-                            </div>
-                            <div class="content">
-                                <div class="c-hd">
-                                    <a class="reply" href="${item.html_url}" target="_blank">详情</a>
-                                    <a class="name" href="${item.user.html_url}">${item.user.login}</a>
-                                    <span class="time">${new Date(item.updated_at).toLocaleString()}</span></div>
-                                <div class="c-bd"><h3>${item.title.length<20?item.title:''}</h3><p>${item.body}</p></div>
-                            </div>
-                        </li>`);
-                    }
-                    document.getElementById('comment').innerHTML = comments.join('');
-                }
-              });
-        </script>
+        <script type="text/javascript" src="./static/script/dm-core.js"></script>
+        <script type="text/javascript" src="./static/script/dm-save.js"></script>
         <script type="text/javascript" src="./static/script/common.js"></script>
     </body>
 </html>
