@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta name="description" content="吃豆游戏存档管理：保存当前进度、覆盖、删除与导出存档">
     <meta name="keywords" content="吃豆游戏,存档,游戏存档">
     <meta name="author" content="旧城新月, JCXYOZH" />
@@ -19,14 +19,17 @@
             <div class="inner">
                 <div class="bd">
                     <div class="logo">
-                        <a href="./"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
+                        <a href="./" aria-label="返回吃豆游戏首页"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
                     </div>
-                    <nav>
-                        <li><a href="./project.html">项目</a></li>
-                        <li><a href="./player.html">玩家</a></li>
-                        <li class="active"><a href="./save.html">存档</a></li>
-                        <li><a href="./load.html">读档</a></li>
-                        <li><a href="./about.html">关于</a></li>
+                    <nav aria-label="主导航">
+                        <ul>
+                            <li><a href="./index.html">游戏</a></li>
+                            <li><a href="./project.html">项目</a></li>
+                            <li><a href="./player.html">玩家</a></li>
+                            <li class="active" aria-current="page"><a href="./save.html">存档</a></li>
+                            <li><a href="./load.html">读档</a></li>
+                            <li><a href="./about.html">关于</a></li>
+                        </ul>
                     </nav>
                     <div class="operation">
                         <a class="btn" href="https://github.com/JCXYOZH" rel="nofollow" target="_blank" title="Github">
@@ -51,7 +54,9 @@
             </svg>
         </div>
     </header>
-    <div class="container">
+    <main class="container">
+        <!-- 供读屏器与搜索引擎识别页面主标题；视觉标题由下方模块承担。 -->
+        <h1 class="dm-visually-hidden">存档管理</h1>
         <div class="inner">
             <section class="mod-dm mod-dm-save">
                 <div class="hd">
@@ -60,19 +65,22 @@
                 </div>
                 <div class="bd">
                     <div id="dm-notice"></div>
+                    <!-- 当前进度卡片：读取游戏页写入的检查点，可保存为手动档。 -->
                     <div id="dm-progress"></div>
                     <div class="dm-section-title">手动存档 <span class="sub" id="dm-manual-count"></span></div>
+                    <!-- 手动档：玩家命名、可覆盖、可导出，最多 20 份。 -->
                     <div id="dm-manual"></div>
                     <div class="dm-section-title">自动存档 <span class="sub">通关或离开页面时自动保留最近 3 份</span></div>
+                    <!-- 自动档：系统滚动维护，不提供覆盖按钮。 -->
                     <div id="dm-auto"></div>
                     <div class="dm-toolbar" id="dm-toolbar">
                         <button type="button" class="dm-btn dm-btn-ghost" id="dm-export">导出全部存档</button>
-                        <div class="tip">导出的 .json 文件可在其他浏览器/设备迁入；导入入口位于<a href="./load.html">读档页</a>。</div>
+                        <div class="tip">卡片内「导出」只导出该份存档；底部按钮导出全部有效存档。文件可在其他浏览器/设备迁入，导入入口位于<a href="./load.html">读档页</a>。</div>
                     </div>
                 </div>
             </section>
         </div>
-    </div>
+    </main>
     <footer>
         <div class="mod-fixedbar">
             <div class="bd">

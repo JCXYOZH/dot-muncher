@@ -2,7 +2,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <meta name="description" content="关于本站">
         <meta name="keywords" content="联系方式">
         <meta name="author" content="旧城新月, JCXYOZH" />
@@ -19,14 +19,17 @@
                     <div class="inner">
                         <div class="bd">
                             <div class="logo">
-                                <a href="./"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
+                                <a href="./" aria-label="返回吃豆游戏首页"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
                             </div>
-                            <nav>
-                                <li><a href="./project.html">项目</a></li>
-                                <li><a href="./player.html">玩家</a></li>
-                                <li><a href="./save.html">存档</a></li>
-                                <li><a href="./load.html">读档</a></li>
-                                <li class="active"><a href="./about.html">关于</a></li>
+                            <nav aria-label="主导航">
+                                <ul>
+                                    <li><a href="./index.html">游戏</a></li>
+                                    <li><a href="./project.html">项目</a></li>
+                                    <li><a href="./player.html">玩家</a></li>
+                                    <li><a href="./save.html">存档</a></li>
+                                    <li><a href="./load.html">读档</a></li>
+                                    <li class="active" aria-current="page"><a href="./about.html">关于</a></li>
+                                </ul>
                             </nav>
                             <div class="operation">
                                 <a class="btn" href="https://github.com/JCXYOZH" rel="nofollow" target="_blank" title="Github">
@@ -51,8 +54,11 @@
                     </svg>
                 </div>
             </header>
-            <div class="container">
+            <main class="container">
+                <!-- 供读屏器与搜索引擎识别页面主标题；视觉标题由下方模块承担。 -->
+                <h1 class="dm-visually-hidden">关于</h1>
                 <div class="inner">
+                    <!-- 引言区：与个人介绍分离，形成视觉层次。 -->
                     <section class="mod-word">
                         <div class="bd">
                             <blockquote>
@@ -76,6 +82,7 @@
                             <h3 class="title">联系方式</h3>
                         </div>
                         <div class="bd">
+                            <!-- 联系方式字段使用 field-wrapper 两列布局，窄屏自动收窄标题列。 -->
                             <div class="field-wrapper">
                                 <div class="field-title">邮箱：</div>
                                 <div class="field-content"><a href="/cdn-cgi/l/email-protection#106a787f7e777865794f7c797e5061613e737f7d"><span class="__cf_email__" data-cfemail="96ecfef9f8f1fee3ffc9fafff8d6e7e7b8f5f9fb">[email&#160;protected]</span></a></div>
@@ -95,7 +102,7 @@
                         </div>
                     </section>
                 </div>
-            </div>
+            </main>
             <footer>
                 <div class="mod-fixedbar">
                     <div class="bd">

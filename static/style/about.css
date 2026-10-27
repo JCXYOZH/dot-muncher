@@ -1,3 +1,7 @@
+/*
+ * about.css —— 关于页样式
+ * 由引言 blockquote + 多个 mod-panel 卡片组成，移动端收窄内边距。
+ */
 .mod-word{
     margin-bottom: 25px;
 }

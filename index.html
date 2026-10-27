@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
     <head>
         <meta charset="utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
         <meta name="robots" content="all">
         <meta name="referrer" content="always">
         <meta name="renderer" content="webkit">
@@ -19,20 +19,25 @@
         <link rel="stylesheet" href="./static/style/dm.css">
     </head>
     <body>
+        <!-- 页面骨架：固定头部 + 游戏主区 + 页脚。wrapper 使用 flex 让页脚始终贴底。 -->
         <div class="wrapper">
             <header>
                 <div class="mod-head">
                     <div class="inner">
                         <div class="bd">
                             <div class="logo">
-                                <a href="./"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
+                                <a href="./" aria-label="返回吃豆游戏首页"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
                             </div>
-                            <nav>
-                                <li class="active"><a href="./project.html">项目</a></li>
-                                <li><a href="./player.html">玩家</a></li>
-                                <li><a href="./save.html">存档</a></li>
-                                <li><a href="./load.html">读档</a></li>
-                                <li><a href="./about.html">关于</a></li>
+                            <!-- 主导航：六个页面共用同一结构；当前页用 active + aria-current 标记。 -->
+                            <nav aria-label="主导航">
+                                <ul>
+                                    <li class="active" aria-current="page"><a href="./index.html">游戏</a></li>
+                                    <li><a href="./project.html">项目</a></li>
+                                    <li><a href="./player.html">玩家</a></li>
+                                    <li><a href="./save.html">存档</a></li>
+                                    <li><a href="./load.html">读档</a></li>
+                                    <li><a href="./about.html">关于</a></li>
+                                </ul>
                             </nav>
                             <div class="operation">
                                 <a class="btn" href="https://github.com/JCXYOZH/dot-muncher" rel="nofollow" target="_blank" title="Github">
@@ -57,16 +62,19 @@
                     </svg>
                 </div>
             </header>
-            <div class="container">
+            <main class="container">
+                <!-- 供读屏器与搜索引擎识别页面主标题；视觉标题由下方模块承担。 -->
+                <h1 class="dm-visually-hidden">吃豆游戏</h1>
                 <div class="mod-panel">
                     <div class="inner">
                         <div class="bd">
-                            <canvas id="canvas" width="960" height="640">不支持画布</canvas>
+                            <!-- Canvas 内部分辨率固定 960x640；CSS 负责在窄屏等比缩放。 -->
+                            <canvas id="canvas" width="960" height="640" aria-label="吃豆游戏画面，使用方向键或 WASD 移动，空格暂停">您的浏览器不支持 Canvas，请更换现代浏览器。</canvas>
                         </div>
                         <div class="ft">
                             <div class="info">
-                                <p>按 [空格键] 暂停或继续</p>
-                                <p>Press [space] to pause or continue</p>
+                                <p>方向键 / WASD 移动，[空格键] 暂停或继续</p>
+                                <p>Arrow keys / WASD to move, [space] to pause or continue</p>
                                 <p class="links">
                                     <a href="./player.html">玩家</a><span class="sep">|</span><a href="./save.html">存档</a><span class="sep">|</span><a href="./load.html">读档</a>
                                 </p>
@@ -86,8 +94,9 @@
                         </div>
                     </div>
                 </div>
+                <!-- projects.js 会在此脚本位置后插入“更多开源项目”快捷入口。 -->
                 <script type="text/javascript" src="./static/script/projects.js"></script>
-            </div>
+            </main>
             <footer>
                 <div class="mod-fixedbar">
                     <div class="bd">
@@ -114,7 +123,6 @@
         <script src="./static/script/game.js"></script>
         <script src="./static/script/dm-core.js"></script>
         <script src="./static/script/index.js"></script>
-        <script async defer src="./static/script/buttons.js"></script>
         <script type="text/javascript" src="./static/script/common.js"></script>
     </body>
 </html>

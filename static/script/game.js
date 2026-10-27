@@ -1,10 +1,19 @@
 'use strict';
 
 /*
-* 小型游戏引擎
-*/
+ * 小型游戏引擎
+ *
+ * 设计目标：
+ *   - 不依赖第三方库，使用 Canvas 2D + requestAnimationFrame 驱动；
+ *   - 用 Stage（布景）组织启动页 / 12 个关卡 / 结算页；
+ *   - 用 Map（地图）描述墙、豆子、坐标转换与 BFS 寻路；
+ *   - 用 Item（活动对象）描述玩家、幽灵和纯绘制型文本/图标。
+ *
+ * 一个 Stage 内可以有多张 Map（墙、豆子）和多个 Item（玩家、幽灵、HUD 文本）。
+ * 引擎只负责“何时 update / 何时 draw”，具体规则全部由 index.js 注入。
+ */
 
-// requestAnimationFrame polyfill
+// requestAnimationFrame polyfill：兼容旧浏览器与 iOS 6 的异常实现。
 if (!Date.now)
 Date.now = function() { return new Date().getTime(); };
 (function() {
@@ -28,6 +37,17 @@ Date.now = function() { return new Date().getTime(); };
     }
 }());
 
+/*
+ * 游戏主类。
+ * @param {string} id canvas 元素 ID
+ * @param {Object} params 可覆盖 width / height
+ *
+ * 内部状态：
+ *   _stages  所有布景
+ *   _events  事件注册表，key 形如 s<stageIndex>i<itemId>
+ *   _index   当前布景索引
+ *   _hander  requestAnimationFrame 返回句柄
+ */
 function Game(id,params){
     var _ = this;
     var settings = {
@@ -43,7 +63,7 @@ function Game(id,params){
     var _events = {};							//事件集合
     var _index=0,								//当前布景索引
         _hander;  								//帧动画控制
-    //活动对象构造
+    /* 活动对象构造器：所有可绘制、可更新的实体都由此创建。 */
     var Item = function(params){
         this._params = params||{};
         this._id = 0;               //标志符
@@ -73,6 +93,11 @@ function Game(id,params){
         };
         Object.assign(this,this._settings,this._params);
     };
+    /*
+     * 给单个 Item 绑定 Canvas 事件。
+     * 引擎只在 canvas 上挂一个原生监听器，再根据点击/触摸坐标做矩形命中测试，
+     * 这样即使有几十个 Item，也不会产生几十个 DOM 监听器。
+     */
     Item.prototype.bind = function(eventType,callback){
         if(!_events[eventType]){
             _events[eventType] = {};
@@ -91,7 +116,7 @@ function Game(id,params){
         }
         _events[eventType]['s'+this._stage.index+'i'+this._id] = callback.bind(this);  //绑定作用域
     };
-    //地图对象构造器
+    /* 地图对象构造器：data 为二维数组，0=可走，1=墙，2=幽灵巢穴。 */
     var Map = function(params){
         this._params = params||{};
         this._id = 0;               //标志符
@@ -111,27 +136,37 @@ function Game(id,params){
         };
         Object.assign(this,this._settings,this._params);
     };
-    //获取地图上某点的值
+    /*
+     * 读取地图坐标 (x,y) 的值。
+     * 越界统一返回 -1，调用方（寻路/碰撞）无需重复判断边界。
+     */
     Map.prototype.get = function(x,y){
         if(this.data[y]&&typeof this.data[y][x]!='undefined'){
             return this.data[y][x];
         }
         return -1;
     };
-    //设置地图上某点的值
+    /* 写入地图坐标；行不存在时静默忽略，避免越界写入创建稀疏数组。 */
     Map.prototype.set = function(x,y,value){
         if(this.data[y]){
             this.data[y][x] = value;
         }
     };
-    //地图坐标转画布坐标
+    /*
+     * 地图格坐标 -> 画布像素中心点。
+     * 加 size/2 是为了让对象落在格子中心，而不是左上角。
+     */
     Map.prototype.coord2position = function(cx,cy){
         return {
             x:this.x+cx*this.size+this.size/2,
             y:this.y+cy*this.size+this.size/2
         };
     };
-    //画布坐标转地图坐标
+    /*
+     * 画布像素坐标 -> 地图格坐标。
+     * offset 表示当前坐标距离格子中心的距离，用于判断“是否已经到达格心”。
+     * 隧道区域允许坐标为负，因此使用 Math.abs 处理取模。
+     */
     Map.prototype.position2coord = function(x,y){
         var fx = Math.abs(x-this.x)%this.size-this.size/2;
         var fy = Math.abs(y-this.y)%this.size-this.size/2;
@@ -141,7 +176,20 @@ function Game(id,params){
             offset:Math.sqrt(fx*fx+fy*fy)
         };
     };
-    //寻址算法
+    /*
+     * 寻路算法（广度优先搜索）。
+     * @param {Object} params
+     *   map   二维地图
+     *   start 起点 {x,y}
+     *   end   终点 {x,y}
+     *   type  'path' 返回完整路径；'next' 只返回终点周围可走的下一步集合
+     * @return {Array} 路径坐标数组；不可达时返回 []
+     *
+     * 实现要点：
+     *   - steps 二维数组既记录“是否访问过”，也记录该点由哪个点扩展而来；
+     *   - 地图越界（值为 -1）时按隧道处理，坐标取模后打上 change 标记；
+     *   - 使用队列式逐层扩展，保证第一次到达终点时路径最短。
+     */
     Map.prototype.finder = function(params){
         var defaults = {
             map:null,
@@ -157,14 +205,19 @@ function Game(id,params){
         var result = [];
         var y_length  = options.map.length;
         var x_length = options.map[0].length;
-        var steps = Array(y_length).fill(0).map(()=>Array(x_length).fill(0));     //步骤的映射
+        // 步骤映射：0 表示未访问；访问后存放“来源坐标”对象，用于回溯路径。
+        var steps = Array(y_length).fill(0).map(()=>Array(x_length).fill(0));
         var _getValue = function(x,y){  //获取地图上的值
             if(options.map[y]&&typeof options.map[y][x]!='undefined'){
                 return options.map[y][x];
             }
             return -1;
         };
-        var _next = function(to){ //判定是否可走,可走放入列表
+        /*
+         * 判断一个相邻格是否可走，可走则加入 result。
+         * 地图外坐标通过取模实现左右/上下互通（经典吃豆隧道）。
+         */
+        var _next = function(to){
             var value = _getValue(to.x,to.y);
             if(value<1){
                 if(value==-1){
@@ -177,7 +230,11 @@ function Game(id,params){
                 }
             }
         };
-        var _render = function(list){//找线路
+        /*
+         * 逐层扩展。
+         * list 为当前层的所有节点；每轮把下一层放入 new_list，递归直到找到终点或没有新节点。
+         */
+        var _render = function(list){
             var new_list = [];
             var next = function(from,to){
                 var value = _getValue(to.x,to.y);
@@ -223,7 +280,10 @@ function Game(id,params){
         }
         return result;
     };
-    //布景对象构造器
+    /*
+     * 布景对象构造器。
+     * 每个布景拥有独立的地图、对象、倒计时与 update 钩子。
+     */
     var Stage = function(params){
         this._params = params||{};
         this._settings = {
@@ -238,7 +298,11 @@ function Game(id,params){
         };
         Object.assign(this,this._settings,this._params);
     };
-    //添加对象
+    /*
+     * 添加活动对象，并把它绑定到当前布景。
+     *   - 若对象声明了 location/coord，会自动换算初始像素坐标；
+     *   - Item ID 等于加入顺序，事件表用它定位回调。
+     */
     Stage.prototype.createItem = function(options){
         var item = new Item(options);
         //动态属性
@@ -251,7 +315,10 @@ function Game(id,params){
         this.items.push(item);
         return item;
     };
-    //重置物体位置
+    /*
+     * 重置所有对象到初始参数。
+     * 用于“生命 -1 后重开本关”：保留关卡地图与得分，但玩家/幽灵回到初始位置。
+     */
     Stage.prototype.resetItems = function(){
         this.status = 1;
         this.items.forEach(function(item,index){
@@ -261,13 +328,16 @@ function Game(id,params){
             }
         });
     };
-    //获取对象列表
+    /* 按 type 筛选对象（1=玩家，2=幽灵），存档快照依赖此只读接口。 */
     Stage.prototype.getItemsByType = function(type){
         return this.items.filter(function(item){
 	    return item.type == type;
         });
     };
-    //添加地图
+    /*
+     * 添加地图并深拷贝源数据。
+     * x_length/y_length 提前算好，绘制循环无需反复访问嵌套数组。
+     */
     Stage.prototype.createMap = function(options){
         var map = new Map(options);
         //动态属性
@@ -281,7 +351,10 @@ function Game(id,params){
         this.maps.push(map);
         return map;
     };
-    //重置地图
+    /*
+     * 重置地图数据。
+     * 必须深拷贝 _params.data，否则吃到豆子后修改的是同一份数组，重开本关无法恢复豆子。
+     */
     Stage.prototype.resetMaps = function(){
         this.status = 1;
         this.maps.forEach(function(map){
@@ -292,13 +365,16 @@ function Game(id,params){
             map.imageData = null;
         });
     };
-    //重置
+    /* 布景完整重置：恢复自身参数、所有对象位置与所有地图数据。 */
     Stage.prototype.reset = function(){
         Object.assign(this,this._settings,this._params);
         this.resetItems();
         this.resetMaps();
     };
-    //绑定事件
+    /*
+     * 给布景绑定全局事件（keydown 等）。
+     * 只有当前布景的处理器会执行，避免启动页和关卡页同时响应按键。
+     */
     Stage.prototype.bind = function(eventType,callback){
         if(!_events[eventType]){
             _events[eventType] = {};
@@ -312,13 +388,18 @@ function Game(id,params){
         }
         _events[eventType]['s'+this.index] = callback.bind(this);	//绑定事件作用域
     };
-    //动画开始
+    /*
+     * 启动主循环。
+     * 每帧：清屏 -> 布景 update -> 地图 update/draw -> 对象 update/draw。
+     * 使用 16ms 限频，避免 120Hz/144Hz 屏幕上游戏速度翻倍。
+     */
     this.start = function() {
         var f = 0;		//帧数计算
         var timestamp = (new Date()).getTime();
         var fn = function(){
             var now = (new Date()).getTime();
-            if(now-timestamp<16){   // 限频，防止高刷屏幕动画过快
+            // 距离上一帧不足 16ms 时仅继续排队，不推进游戏逻辑。
+            if(now-timestamp<16){
                 _hander = requestAnimationFrame(fn);
                 return false;
             }
@@ -337,6 +418,7 @@ function Game(id,params){
                         map.times = f/map.frames;		//计数器
                     }
                     if(map.cache){
+                        // 静态地图（墙）只绘制一次并缓存为 ImageData，后续直接贴图。
                         if(!map.imageData){
                             _context.save();
                             map.draw(_context);
@@ -354,7 +436,8 @@ function Game(id,params){
                     if(!(f%item.frames)){
                         item.times = f/item.frames;		   //计数器
                     }
-                    if(stage.status==1&&item.status!=2){  	//对象及布景状态都不处于暂停状态
+                    // 只有布景正常运行且对象未暂停时才更新；暂停时仍然 draw，保留画面。
+                    if(stage.status==1&&item.status!=2){
                         if(item.location){
                             item.coord = item.location.position2coord(item.x,item.y);
                         }
@@ -370,26 +453,35 @@ function Game(id,params){
         };
         _hander = requestAnimationFrame(fn);
     };
-    //动画结束
+    /* 停止主循环；重复调用安全。 */
     this.stop = function(){
         _hander&&cancelAnimationFrame(_hander);
     };
-    //事件坐标
+    /*
+     * 把鼠标/触摸事件的视口坐标换算成 canvas 内部分辨率坐标。
+     * 注意必须先用 clientX 减去 canvas 左边界，再乘缩放比例，
+     * 否则 canvas 被 CSS 缩小后点击热区会整体偏移。
+     */
     this.getPosition = function(e){
         var box = $canvas.getBoundingClientRect();
         return {
-            x:e.clientX-box.left*(_.width/box.width),
-            y:e.clientY-box.top*(_.height/box.height)
+            // 先减去画布在视口中的偏移，再按缩放比例换算成内部分辨率坐标。
+            // 原写法缺少括号，画布缩放后点击热区会偏移；此修改不改变桌面端 1:1 时的结果。
+            x:(e.clientX-box.left)*(_.width/box.width),
+            y:(e.clientY-box.top)*(_.height/box.height)
         };
     }
-    //创建布景
+    /* 创建布景并自动分配索引。 */
     this.createStage = function(options){
         var stage = new Stage(options);
         stage.index = _stages.length;
         _stages.push(stage);
         return stage;
     };
-    //指定布景
+    /*
+     * 切换到指定布景。
+     * 先把旧布景 status 置 0（停止更新），再激活并 reset 新布景。
+     */
     this.setStage = function(index){
         _stages[_index].status = 0;
         _index = index;
@@ -397,7 +489,7 @@ function Game(id,params){
         _stages[_index].reset(); //重置
         return _stages[_index];
     };
-    //下个布景
+    /* 进入下一个布景；已经是最后一个时抛错，由调用方决定是否处理。 */
     this.nextStage = function(){
         if(_index<_stages.length-1){
             return this.setStage(++_index);
@@ -405,7 +497,7 @@ function Game(id,params){
             throw new Error('unfound new stage.');
         }
     };
-    //获取布景列表
+    /* 只读访问器：存档系统需要按索引拿到指定关卡。 */
     this.getStages = function(){
         return _stages;
     };
@@ -413,7 +505,7 @@ function Game(id,params){
     this.getIndex = function(){
         return _index;
     };
-    //初始化游戏引擎
+    /* 初始化：回到启动页并启动主循环。 */
     this.init = function(){
         _index = 0;
         this.start();

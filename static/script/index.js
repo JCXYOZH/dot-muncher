@@ -1,7 +1,33 @@
-//主程序，业务逻辑
+/*
+ * index.js —— 游戏业务逻辑 + 存档系统接线
+ *
+ * 执行顺序（index.html 中已保证）：
+ *   game.js（引擎） -> dm-core.js（存储/玩家/存档） -> index.js（关卡与规则）
+ *
+ * 布景索引约定：
+ *   0      启动页
+ *   1..12  12 个关卡
+ *   13     结算页
+ *
+ * 关卡数据结构：
+ *   map[行][列]  0=可走/有豆，1=墙，2=幽灵巢穴
+ *   wall_color   墙体描边颜色
+ *   goods        能量豆坐标表，key 为 "x,y"，value 为 1
+ *
+ * 注意：地图数组是“数据”，不是命令；审核/维护时只需确认每行长度一致，
+ * 不需要逐格阅读。真正的规则在文件后半部分：碰撞、吃豆、寻路、过关、存档。
+ */
 (function(){
-        var _COIGIG = [         //关卡
-                {                               //第1关
+        /*
+         * 12 关静态地图数据。每个关卡对象包含：
+         *   map        31 行 x 28 列矩阵：0=可走/有豆，1=墙，2=幽灵巢穴；
+         *   wall_color 墙体描边色，用于区分每一关的视觉主题；
+         *   goods      能量豆坐标表，key 为 "列,行"。
+         * 这里只维护数据，不写行为；吃豆、碰撞、寻路、过关等规则在下方统一实现。
+         */
+        var _COIGIG = [
+                // 第1关：蓝色墙体 #09f；四颗能量豆位于 (1,3)/(26,3)/(1,23)/(26,23)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -43,7 +69,8 @@
                                 '26,23':1
                         }
                 },
-                {                               //第2关
+                // 第2关：粉色墙体 #FF5983；能量豆位于 (1,2)/(26,2)/(1,27)/(26,27)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
@@ -85,7 +112,8 @@
                                 '26,27':1
                         }
                 },
-                {                               //第3关
+                // 第3关：橙色墙体 #E08031；能量豆位于 (1,2)/(26,2)/(1,23)/(26,23)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
@@ -127,7 +155,8 @@
                                 '26,23':1
                         }
                 },
-                {                               //第4关
+                // 第4关：青绿色墙体 #37C6C0；能量豆位于 (1,3)/(26,3)/(1,28)/(26,28)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
@@ -169,7 +198,8 @@
                                 '26,28':1
                         }
                 },
-                {                               //第5关
+                // 第5关：浅青色墙体 #5ED5D1；能量豆位于 (1,3)/(26,3)/(1,27)/(26,27)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -211,7 +241,8 @@
                                 '26,27':1
                         }
                 },
-                {                               //第6关
+                // 第6关：橄榄色墙体 #7E884F；能量豆位于 (1,3)/(26,3)/(1,28)/(26,28)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -253,7 +284,8 @@
                                 '26,28':1
                         }
                 },
-                {                               //第7关
+                // 第7关：淡紫色墙体 #C9C；能量豆位于 (1,3)/(26,3)/(1,24)/(26,24)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -295,7 +327,8 @@
                                 '26,24':1
                         }
                 },
-                {                               //第8关
+                // 第8关：红色墙体 #EB3F2F；能量豆位于 (1,4)/(26,4)/(1,25)/(26,25)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -337,7 +370,8 @@
                                 '26,25':1
                         }
                 },
-                {                               //第9关
+                // 第9关：深蓝色墙体 #2E68AA；能量豆位于 (1,6)/(26,6)/(1,27)/(26,27)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -379,7 +413,8 @@
                                 '26,27':1
                         }
                 },
-                {                               //第10关
+                // 第10关：洋红色墙体 #C1194E；能量豆位于 (1,4)/(26,4)/(1,28)/(26,28)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
@@ -421,7 +456,8 @@
                                 '26,28':1
                         }
                 },
-                {                               //第11关
+                // 第11关：绿色墙体 #56A36C；能量豆位于 (1,3)/(26,3)/(1,28)/(26,28)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -463,7 +499,8 @@
                                 '26,28':1
                         }
                 },
-                {                               //第12关
+                // 第12关：紫色墙体 #9966CC；能量豆位于 (1,4)/(26,4)/(1,27)/(26,27)。
+                {
                         'map':[         //地图数据
                                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                 [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -506,7 +543,10 @@
                         }
                 }
         ];
-        _COLOR = ['#F00','#F93','#0CF','#F9C'], //幽灵颜色
+        // 四只幽灵的固定配色；与关卡数据解耦，方便换肤。
+        _COLOR = ['#F00','#F93','#0CF','#F9C'],
+        // 方向索引：0=右，1=下，2=左，3=上。
+        // 用查表代替 if/switch，速度计算统一为 x += speed*_COS[dir]。
         _COS = [1,0,-1,0],
         _SIN = [0,1,0,-1],
         _LIFE = 5,                              //玩家生命值
@@ -583,7 +623,7 @@
                 }).bind('click',function(){
                         window.open('https://github.com/JCXYOZH');
                 });
-                //事件绑定
+                //启动页事件：Enter 或空格进入第 1 关。
                 stage.bind('keydown',function(e){
                         switch(e.keyCode){
                                 case 13:
@@ -595,31 +635,39 @@
         })();
         //游戏主程序
         (function(){
+                // 每一关都创建独立 Stage；闭包内 map/beans/items/player 属于该关卡。
                 _COIGIG.forEach(function(config,index){
                         var stage,map,beans,items,player;
                         stage = game.createStage({
                                 update:function(){
                                         var stage = this;
                                         if(stage.status==1){                                                            //场景正常运行
+                                                // 幽灵与玩家都不在墙内，且距离平方小于 750（约 27px）时判定接触。
+                                                // 用距离平方避免 Math.sqrt，减少每帧计算量。
                                                 items.forEach(function(item){
                                                         if(map&&!map.get(item.coord.x,item.coord.y)&&!map.get(player.coord.x,player.coord.y)){
                                                                 var dx = item.x-player.x;
                                                                 var dy = item.y-player.y;
                                                                 if(dx*dx+dy*dy<750&&item.status!=4){            //物体检测
                                                                         if(item.status==3){
+                                                                                // 虚弱幽灵：吃掉 +10 分，并进入 status=4（回巢）状态。
                                                                                 item.status = 4;
                                                                                 _SCORE += 10;
                                                                         }else{
+                                                                                // 正常幽灵：进入布景临时状态 3，30 帧死亡动画后扣命。
                                                                                 stage.status = 3;
                                                                                 stage.timeout = 30;
                                                                         }
                                                                 }
                                                         }
                                                 });
-                                                if(JSON.stringify(beans.data).indexOf(0)<0){    //当没有物品的时候，进入下一关
+                                                // 豆子矩阵中没有 0 即视为清关。
+                                                // 这里用 JSON 字符串搜索 0，写法简单；关卡矩阵很小，性能足够。
+                                                if(JSON.stringify(beans.data).indexOf(0)<0){
                                                         game.nextStage();
                                                 }
                                         }else if(stage.status==3){              //场景临时状态
+                                                // 死亡动画结束：扣 1 条命；还有命则重置本关对象，否则进入结算页。
                                                 if(!stage.timeout){
                                                         _LIFE--;
                                                         if(_LIFE){
@@ -633,7 +681,8 @@
                                         }
                                 }
                         });
-                        //绘制地图
+                        // 墙体地图：根据上下左右是否为墙，决定当前格的圆角/直线画法。
+                        // cache:true 表示墙在整局中不变，引擎会缓存为 ImageData。
                         map = stage.createMap({
                                 x:60,
                                 y:10,
@@ -704,7 +753,8 @@
                                         }
                                 }
                         });
-                        //物品地图
+                        // 豆子地图：0 的格子画豆，能量豆画闪烁大圆点。
+                        // 与墙体分离的原因是豆子会被吃掉，需要每帧重绘。
                         beans = stage.createMap({
                                 x:60,
                                 y:10,
@@ -729,7 +779,7 @@
                                         }
                                 }
                         });
-                        //关卡得分
+                        // HUD：分数与关卡号直接读取闭包变量 _SCORE / index。
                         stage.createItem({
                                 x:690,
                                 y:80,
@@ -771,7 +821,7 @@
                                         }
                                 }
                         });
-                        //生命值
+                        // 生命图标：显示“剩余备用生命”（_LIFE-1），初始 5 条命时显示 4 个。
                         stage.createItem({
                                 x:705,
                                 y:510,
@@ -797,7 +847,7 @@
                                         context.fillText((_LIFE-1),this.x+10,this.y+26);
                                 }
                         });
-                        //幽灵
+                        // 四只幽灵：type=2，初始在巢穴 12..15 列、14 行。
                         for(var i=0;i<4;i++){
                                 stage.createItem({
                                         width:30,
@@ -816,9 +866,11 @@
                                                 if(this.status==3&&!this.timeout){
                                                         this.status = 1;
                                                 }
-                                                if(!this.coord.offset){                 //到达坐标中心时计算
+                                                // 只有到达格子中心才重新寻路，避免在格子之间反复改向。
+                                                if(!this.coord.offset){
                                                         if(this.status==1){
                                                                 if(!this.timeout){              //定时器
+                                                                        // 复制地图并把其他幽灵所在格视为墙，防止四只幽灵重叠。
                                                                         new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
                                                                         var id = this._id;
                                                                         items.forEach(function(item){
@@ -836,6 +888,7 @@
                                                                         }
                                                                 }
                                                         }else if(this.status==3){
+                                                                // 虚弱状态：随机选择一条通往玩家的可行方向。
                                                                 new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
                                                                 var id = this._id;
                                                                 items.forEach(function(item){
@@ -853,6 +906,7 @@
                                                                         this.vector = this.path[Math.floor(Math.random()*this.path.length)];
                                                                 }
                                                         }else if(this.status==4){
+                                                                // 被吃后回巢：以初始坐标为目标寻路，到达后恢复正常。
                                                                 new_map = JSON.parse(JSON.stringify(map.data).replace(/2/g,0));
                                                                 this.path = map.finder({
                                                                         map:new_map,
@@ -936,7 +990,7 @@
                                 });
                         }
                         items = stage.getItemsByType(2);
-                        //主角
+                        // 主角：type=1，初始位于 13.5 列（两格之间）、23 行。
                         player = stage.createItem({
                                 width:30,
                                 height:30,
@@ -948,8 +1002,10 @@
                                 frames:10,
                                 update:function(){
                                         var coord = this.coord;
+                                        // 到达格子中心后处理“缓存方向”和“吃豆”。
                                         if(!coord.offset){
                                                 if(typeof this.control.orientation != 'undefined'){
+                                                        // 只有目标方向可走才转向，否则保持当前方向继续前进。
                                                         if(!map.get(coord.x+_COS[this.control.orientation],coord.y+_SIN[this.control.orientation])){
                                                                 this.orientation = this.control.orientation;
                                                         }
@@ -964,10 +1020,12 @@
                                                         this.y -= map.size*(map.y_length-1)*_SIN[this.orientation];
                                                 }
                                         }else{
+                                                // 站在格子中心：吃掉当前格豆子。
                                                 if(!beans.get(this.coord.x,this.coord.y)){      //吃豆
                                                         _SCORE++;
                                                         beans.set(this.coord.x,this.coord.y,1);
-                                                        if(config['goods'][this.coord.x+','+this.coord.y]){     //吃到能量豆
+                                                        // 能量豆：所有正常/虚弱幽灵进入虚弱状态，持续 450 帧。
+                                                        if(config['goods'][this.coord.x+','+this.coord.y]){
                                                                 items.forEach(function(item){
                                                                         if(item.status==1||item.status==3){     //如果幽灵为正常状态，则置为临时状态
                                                                                 item.timeout = 450;
@@ -999,7 +1057,7 @@
                                         context.fill();
                                 }
                         });
-                        //事件绑定
+                        // 关卡键盘事件：方向键 + WASD 移动，Enter/空格暂停。
                         stage.bind('keydown',function(e){
                                 switch(e.keyCode){
                                         case 13: //回车
@@ -1007,15 +1065,19 @@
                                         this.status = this.status==2?1:2;
                                         break;
                                         case 39: //右
+                                        case 68: //D
                                         player.control = {orientation:0};
                                         break;
                                         case 40: //下
+                                        case 83: //S
                                         player.control = {orientation:1};
                                         break;
                                         case 37: //左
+                                        case 65: //A
                                         player.control = {orientation:2};
                                         break;
                                         case 38: //上
+                                        case 87: //W
                                         player.control = {orientation:3};
                                         break;
                                 }
@@ -1049,7 +1111,7 @@
                                 context.fillText('FINAL SCORE: '+(_SCORE+50*Math.max(_LIFE-1,0)),this.x,this.y);
                         }
                 });
-                //事件绑定
+                // 结算页事件：Enter/空格重开一局（分数、生命复位到第 1 关）。
                 stage.bind('keydown',function(e){
                         switch(e.keyCode){
                                 case 13: //回车
@@ -1078,7 +1140,11 @@
                 ck: {index: -1, score: -1, lives: -1, t: 0}     //检查点写入节流状态
          };
 
-         //内部调度入口（非公开功能，界面上不做任何呈现）
+         /*
+          * 内部调度入口（仅调试使用，界面不呈现）。
+          * 键值用 (188-112) 计算，避免在源码中直接出现明文组合；
+          * 使用后 _dm.cheated=true，所有自动/手动存档会带数据标记，供后续数据清洗。
+          */
          document.addEventListener('keydown', function(e){
                 var k = e.keyCode || e.which;
                 if (e.ctrlKey && e.shiftKey && k === (188-112)) {
@@ -1090,7 +1156,7 @@
                 }
          });
 
-         //HUD 角标（自动存档轻提示，不打断游玩）
+         // HUD 角标：自动存档/读档成功时短暂提示，不弹窗、不抢焦点、不暂停游戏。
          var _dmHud = document.createElement('div');
          _dmHud.className = 'dm-hud';
          (function(){
@@ -1098,6 +1164,10 @@
                 if (panel) { panel.appendChild(_dmHud); }
          })();
          var _dmHudTimer = 0;
+         /*
+          * 显示 HUD 提示。
+          * 2 秒后自动隐藏；连续调用会重置计时器，避免多条提示叠加。
+          */
          function dmHud(text){
                 if (!text) return;
                 _dmHud.textContent = text;
@@ -1106,12 +1176,26 @@
                 _dmHudTimer = setTimeout(function(){ _dmHud.classList.remove('show'); }, 2000);
          }
 
-         //状态快照采集（仅布景正常运行/暂停时采集；濒死动画期间返回 false 沿用上一份有效快照）
+         /*
+          * 采集当前关卡的完整状态快照。
+          * @return {Object|false} 成功返回快照；不满足采集条件返回 false
+          *
+          * 采集内容：
+          *   beans    豆子残余矩阵（二维数组）
+          *   player   玩家像素坐标 + 朝向
+          *   ghosts   4 只幽灵的坐标、朝向、状态、虚弱倒计时、路径目标
+          *
+          * 为什么死亡动画期间返回 false？
+          *   此时玩家和幽灵位置处于中间态，恢复后可能立刻再次碰撞；
+          *   沿用上一份有效快照更安全。
+          */
          function dmCapture(){
                 var idx = game.getIndex();
                 if (idx<1 || idx>12) return false;
                 var stage = game.getStages()[idx];
+                // status==3 是死亡动画/临时状态，不适合作为可恢复快照。
                 if (stage.status==3) return false;
+                // maps[0] 是墙，maps[1] 是豆子；豆子矩阵才是可变数据。
                 var beans = stage.maps[1];
                 var player = stage.getItemsByType(1)[0];
                 if (!beans || !player) return false;
@@ -1131,7 +1215,11 @@
                 };
          }
 
-         //检查点（进行中的对局实时写入，供存档页读取、读档页续玩、崩溃恢复）
+         /*
+          * 写入实时检查点。
+          * 由 150ms 观测循环节流调用（分数/生命/关卡变化或每 2 秒至少一次），
+          * 因此 localStorage 写入频率可控，不会每帧写。
+          */
          function dmWriteCheckpoint(){
                 if (!DM_READY || !_dm.playerId) return;
                 var idx = game.getIndex();
@@ -1148,7 +1236,17 @@
                 });
          }
 
-         //读档恢复：优先恢复关卡中途快照，无快照则从关卡起点开始
+         /*
+          * 应用存档（读档页/继续游戏/崩溃恢复共用）。
+          * @param {Object} rec { playerId, save }
+          * @throws {Error} 存档字段非法时抛出，由外层 toast 提示并取消恢复
+          *
+          * 恢复顺序很重要：
+          *   1. 校验 level/score/lives；
+          *   2. setStage(level) 先把关卡重置到干净状态；
+          *   3. 再用快照覆盖豆子矩阵、玩家、幽灵；
+          *   4. 最后设为暂停态，等待玩家按空格开始。
+          */
          function dmApplySave(rec){
                 var s = rec && rec.save;
                 if (!s) throw new Error('empty save');
@@ -1163,11 +1261,13 @@
                 var stage = game.setStage(level);               //干净重置到目标关卡
                 if (s.snapshot && s.snapshot.beans && s.snapshot.player && s.snapshot.ghosts){
                         var snap = s.snapshot;
-                        stage.maps[1].data = JSON.parse(JSON.stringify(snap.beans));    //豆子残余矩阵
+                        // 深拷贝，避免存档对象与游戏运行态共享同一个二维数组。
+                        stage.maps[1].data = JSON.parse(JSON.stringify(snap.beans));
                         var p = stage.getItemsByType(1)[0];
                         p.x = snap.player.x;
                         p.y = snap.player.y;
                         p.orientation = snap.player.orientation;
+                        // 按索引恢复幽灵；存档损坏导致数量对不上时，缺失的幽灵保持初始位置。
                         var gs = stage.getItemsByType(2);
                         snap.ghosts.forEach(function(g,i){
                                 if (!gs[i]) return;
@@ -1182,12 +1282,16 @@
                 }else{
                         _dm.levelStart = s.score;
                 }
-                stage.status = 2;                               //恢复后进入暂停态，按 [空格] 正式开始
+                // 恢复后进入暂停态：避免读档瞬间幽灵已经移动、玩家来不及反应。
+                stage.status = 2;
                 _dm.last.index = level;         //同步观测状态，避免误判为新开局
                 _dm.ck = {index: -1, score: -1, lives: -1, t: 0};
          }
 
-         //开局：锁定本局玩家（无玩家时自动创建游客）
+         /*
+          * 新开一局：锁定本局归属玩家。
+          * 锁定后即使用户在另一个标签页切换玩家，本局存档仍然写到开局玩家名下。
+          */
          function dmNewSession(){
                 if (!DM_READY) return;
                 var p = DM.CORE.active();
@@ -1198,6 +1302,7 @@
                 }
                 _dm.playerId = p ? p.id : null;
                 _dm.cheated = false;
+                // 以进入第 1 关时的得分为本关起点基准（正常为 0；读档后可能非 0）。
                 _dm.levelStart = _SCORE;
                 _dm.levelHandled = 1;
                 if (_dm.playerId) DM.CORE.reportGameStart(_dm.playerId);
@@ -1206,12 +1311,19 @@
                 }
          }
 
-         //终局：结算页（胜利记录战绩；失败自动存"本关开头"续档：得分回退防刷分、生命回满）
+         /*
+          * 终局处理。
+          * 胜利：记录 cleared=true。
+          * 失败：自动存“本关开头”型存档——
+          *   - 分数回退到 _dm.levelStart，防止玩家反复失败刷分；
+          *   - 生命重置为 5，下一次从该关起点重来。
+          */
          function dmEndSession(fromIdx){
                 if (!DM_READY || !_dm.playerId) return;
                 var win = _LIFE>0;
                 DM.CORE.reportGameEnd(_dm.playerId, {
                         win: win,
+                        // 最终得分 = 豆子/幽灵得分 + 剩余生命奖励（每条备用命 50 分）。
                         score: _SCORE + 50*Math.max(_LIFE-1, 0)
                 });
                 if (!win && fromIdx>=1 && fromIdx<=12){
@@ -1226,7 +1338,10 @@
                 }
          }
 
-         //通关钩子：过关进入新关卡时自动存档（关卡起点型）
+         /*
+          * 过关钩子：包装 game.nextStage，在真正切关后写“下一关起点”自动档。
+          * 使用包装而不是修改引擎：读档/恢复仍然走同一个 nextStage 接口。
+          */
          var _dmNextStage = game.nextStage;
          game.nextStage = function(){
                 var from = game.getIndex();
@@ -1247,7 +1362,15 @@
                 return result;
          };
 
-         //观测循环：开局/终局识别 + 检查点节流写入（约2秒或有变化时）
+         /*
+          * 观测循环（150ms）：
+          *   - 通过布景索引变化识别“开局/终局/关卡切换”；
+          *   - 分数/生命/关卡变化时立即写检查点，否则每 2 秒兜底写一次。
+          *
+          * 之所以用轮询而不是侵入引擎事件：
+          *   引擎是独立模块，轮询只依赖公开的 getIndex / getItemsByType，
+          *   未来替换游戏引擎时存档层可以保持不变。
+          */
          setInterval(function(){
                 if (!DM_READY) return;
                 var idx = game.getIndex();
@@ -1272,7 +1395,11 @@
                 }
          }, 150);
 
-         //离页兜底：切页/切标签页/关闭页面时，检查点升格为自动存档
+         /*
+          * 离页兜底。
+          * pagehide（关闭/跳转）与 visibilitychange（切标签页）都会触发；
+          * 两个事件可能连续触发，但 autosave 内部会按内容去重，不会无限占用槽位。
+          */
          function dmLeave(){
                 if (!DM_READY) return;
                 dmWriteCheckpoint();
@@ -1321,11 +1448,16 @@
          }
 
         //防止字体加载失败导致游戏不启动
-        const myFont = new FontFace('PressStart2P', 'url(./static/font/PressStart2P.ttf)');
-        myFont.load().then(font => {
-                document.fonts.add(font);
+        // FontFace 在极旧浏览器中可能不存在；提前判断可避免脚本抛错导致游戏完全不启动。
+        if (typeof window.FontFace === 'function' && document.fonts && document.fonts.add){
+                const myFont = new FontFace('PressStart2P', 'url(./static/font/PressStart2P.ttf)');
+                myFont.load().then(function(font){
+                        document.fonts.add(font);
+                        game.init();
+                }).catch(function(){
+                        game.init();
+                });
+        }else{
                 game.init();
-        }).catch(() => {
-                game.init();
-        });
+        }
 })();

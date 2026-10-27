@@ -2,7 +2,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <meta name="description" content="吃豆游戏玩家管理：创建、切换、重命名、删除玩家并查看战绩">
         <meta name="keywords" content="吃豆游戏,玩家管理,存档系统">
         <meta name="author" content="旧城新月, JCXYOZH" />
@@ -19,14 +19,17 @@
                     <div class="inner">
                         <div class="bd">
                             <div class="logo">
-                                <a href="./"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
+                                <a href="./" aria-label="返回吃豆游戏首页"><img src="static/image/public/logo.png" width="180" height="64" alt="JCXYOZH"/></a>
                             </div>
-                            <nav>
-                                <li><a href="./project.html">项目</a></li>
-                                <li class="active"><a href="./player.html">玩家</a></li>
-                                <li><a href="./save.html">存档</a></li>
-                                <li><a href="./load.html">读档</a></li>
-                                <li><a href="./about.html">关于</a></li>
+                            <nav aria-label="主导航">
+                                <ul>
+                                    <li><a href="./index.html">游戏</a></li>
+                                    <li><a href="./project.html">项目</a></li>
+                                    <li class="active" aria-current="page"><a href="./player.html">玩家</a></li>
+                                    <li><a href="./save.html">存档</a></li>
+                                    <li><a href="./load.html">读档</a></li>
+                                    <li><a href="./about.html">关于</a></li>
+                                </ul>
                             </nav>
                             <div class="operation">
                                 <a class="btn" href="https://github.com/JCXYOZH" rel="nofollow" target="_blank" title="Github">
@@ -51,7 +54,9 @@
                     </svg>
                 </div>
             </header>
-            <div class="container">
+            <main class="container">
+                <!-- 供读屏器与搜索引擎识别页面主标题；视觉标题由下方模块承担。 -->
+                <h1 class="dm-visually-hidden">玩家管理</h1>
                 <div class="inner">
                     <section class="mod-dm mod-dm-player">
                         <div class="hd">
@@ -60,21 +65,25 @@
                         </div>
                         <div class="bd">
                             <div id="dm-notice"></div>
+                            <!-- 当前玩家卡片：由 dm-player.js 根据 localStorage 动态渲染。 -->
                             <div id="dm-active"></div>
                             <div class="dm-card">
-                                <div class="dm-form-row">
-                                    <input id="dm-new-name" class="dm-input" maxlength="12" placeholder="输入新玩家昵称(1-12字符)"/>
-                                    <button type="button" class="dm-btn" id="dm-new-submit">创建玩家</button>
-                                </div>
-                                <p class="dm-form-error" id="dm-new-error"></p>
+                                <!-- 使用 form + submit 事件，点击按钮与按 Enter 行为一致。 -->
+                                <form class="dm-form-row" id="dm-new-form" novalidate>
+                                    <label class="dm-visually-hidden" for="dm-new-name">玩家昵称</label>
+                                    <input id="dm-new-name" class="dm-input" maxlength="12" required autocomplete="off" placeholder="输入新玩家昵称(1-12字符)"/>
+                                    <button type="submit" class="dm-btn" id="dm-new-submit">创建玩家</button>
+                                </form>
+                                <p class="dm-form-error" id="dm-new-error" role="alert"></p>
                                 <p class="dm-form-hint">玩家数据统计暂存浏览器本地，可用于「存档」与「读档」。</p>
                             </div>
                             <div class="dm-section-title">全部玩家</div>
+                            <!-- 全部玩家列表：事件委托绑定在 document，重绘后无需重新绑定。 -->
                             <div id="dm-list"></div>
                         </div>
                     </section>
                 </div>
-            </div>
+            </main>
             <footer>
                 <div class="mod-fixedbar">
                     <div class="bd">
