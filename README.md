@@ -1,7 +1,7 @@
 # dot-muncher 吃豆游戏
 
 - 项目地址：https://github.com/JCXYOZH/dot-muncher
-- 在线演示：http://setup.cc.cd
+- 在线演示：http://setup.cc.cd:49152
 
 
 
@@ -818,4 +818,3 @@ draw: function(context) {
 - 将静态资源版本化，加入 Service Worker 做离线缓存。
 - 在远程 `store` 适配器上实现账号登录、云存档与冲突合并。
 - 增加自动化回归脚本并纳入 CI，持续验证创建玩家、存档、导入、读档和游戏关键路径。
-
